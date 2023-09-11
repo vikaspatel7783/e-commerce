@@ -1,4 +1,4 @@
-package com.myreads.book.entity;
+package com.ecommerce.product.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -9,26 +9,16 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "BOOK")
-public class Book {
+@Table(name = "PRODUCT")
+public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(name = "category_name")
-    private String categoryName;
-
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private String author;
-
-    @Column
-    private String isbn;
-
-    @Column
-    private String description;
-
+    @Column(nullable = false, name = "price")
+    private float unitPrice;
 }
