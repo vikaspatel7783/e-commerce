@@ -1,7 +1,7 @@
 package com.ecommerce.product;
 
-import com.ecommerce.product.contoller.ProductController;
-import com.ecommerce.product.service.ProductService;
+import com.ecommerce.product.inventory.contoller.ProductInventoryController;
+import com.ecommerce.product.inventory.service.ProductInventoryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -14,14 +14,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(ProductController.class)
-class ProductServiceApplicationTests {
+@WebMvcTest(ProductInventoryController.class)
+class ProductInventoryInventoryServiceApplicationTests {
 
 	@Autowired
 	MockMvc mockMvc;
 
 	@MockBean
-	ProductService productService;
+	ProductInventoryService productInventoryService;
 
 	@Test
 	void contextLoads() {

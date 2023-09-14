@@ -1,4 +1,4 @@
-package com.ecommerce.product.exception;
+package com.ecommerce.product.inventory.exception;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

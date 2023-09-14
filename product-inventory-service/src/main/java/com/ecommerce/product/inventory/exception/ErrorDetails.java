@@ -1,4 +1,4 @@
-package com.ecommerce.product.exception;
+package com.ecommerce.product.inventory.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package com.ecommerce.product.entity;
+package com.ecommerce.product.inventory.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "PRODUCT")
-public class Product {
+@Table(name = "PRODUCT_INVENTORY")
+public class ProductInventory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,4 +21,7 @@ public class Product {
 
     @Column(nullable = false, name = "price")
     private float unitPrice;
+
+    @Column(nullable = false, name = "in_stock")
+    private boolean inStock;
 }

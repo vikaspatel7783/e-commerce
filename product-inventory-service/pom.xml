@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.ecommerce</groupId>
-	<artifactId>product-service</artifactId>
+	<artifactId>product-inventory-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>product-service</name>
-	<description>This lets browse through books categories and books associated with it</description>
+	<name>productInventory-service</name>
+	<description>This manages the inventory of products</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>
