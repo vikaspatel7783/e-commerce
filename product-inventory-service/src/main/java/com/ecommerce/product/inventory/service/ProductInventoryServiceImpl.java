@@ -21,4 +21,9 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     public ProductInventory saveProduct(ProductInventory productInventory) {
         return productInventoryRepository.save(productInventory);
     }
+
+    @Override
+    public ProductInventory findProduct(long id) {
+        return productInventoryRepository.findById(id).orElse(null);
+    }
 }

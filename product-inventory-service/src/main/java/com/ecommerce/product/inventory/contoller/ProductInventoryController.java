@@ -1,7 +1,6 @@
 package com.ecommerce.product.inventory.contoller;
 
 import com.ecommerce.product.inventory.dto.ProductInventory;
-import com.ecommerce.product.inventory.dto.ProductResponse;
 import com.ecommerce.product.inventory.service.ProductInventoryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
@@ -24,13 +23,11 @@ public class ProductInventoryController {
     private ProductInventoryService productInventoryService;
 
     @GetMapping(produces = "application/json")
-    public ResponseEntity<ProductResponse> getAllProducts() {
+    public ResponseEntity<List<ProductInventory>> getAllProducts() {
         LOGGER.info("Request received to getAllProducts.");
         List<com.ecommerce.product.inventory.entity.ProductInventory> allProductInventories = productInventoryService.getAllProducts();
-        ProductResponse productResponse = new ProductResponse();
-        productResponse.setProductInventories(mapEntityToDto(allProductInventories));
         LOGGER.info("Returning response of getAllProducts");
-        return ResponseEntity.ok(productResponse);
+        return ResponseEntity.ok(mapEntityToDto(allProductInventories));
     }
 
     @PostMapping(consumes = "application/json")
@@ -39,6 +36,14 @@ public class ProductInventoryController {
         com.ecommerce.product.inventory.entity.ProductInventory savedProduct = productInventoryService.saveProduct(mapDtoToEntity(productInventory));
         LOGGER.info("Returning response of add product");
         return ResponseEntity.ok(mapEntityToDto(savedProduct));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductInventory> findProduct(@PathVariable(name = "id") long id) {
+        LOGGER.info("Request received to find product by id");
+        com.ecommerce.product.inventory.entity.ProductInventory product = productInventoryService.findProduct(id);
+        LOGGER.info("Returning response of find product by id");
+        return ResponseEntity.ok(mapEntityToDto(product));
     }
 
     private List<ProductInventory> mapEntityToDto(List<com.ecommerce.product.inventory.entity.ProductInventory> productsEntity) {

@@ -8,4 +8,6 @@ public interface ProductInventoryService {
     List<ProductInventory> getAllProducts();
 
     ProductInventory saveProduct(ProductInventory productInventory);
+
+    ProductInventory findProduct(long id);
 }
