@@ -1,6 +1,7 @@
 package com.ecommerce.product.inventory.contoller;
 
 import com.ecommerce.product.inventory.dto.ProductInventory;
+import com.ecommerce.product.inventory.exception.ProductNotFoundException;
 import com.ecommerce.product.inventory.service.ProductInventoryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
@@ -42,6 +43,9 @@ public class ProductInventoryController {
     public ResponseEntity<ProductInventory> findProduct(@PathVariable(name = "id") long id) {
         LOGGER.info("Request received to find product by id");
         com.ecommerce.product.inventory.entity.ProductInventory product = productInventoryService.findProduct(id);
+        if (null == product) {
+            throw new ProductNotFoundException(String.format("Product %d is not found", id));
+        }
         LOGGER.info("Returning response of find product by id");
         return ResponseEntity.ok(mapEntityToDto(product));
     }

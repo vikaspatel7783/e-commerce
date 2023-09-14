@@ -43,7 +43,11 @@ public class OrderController {
     }
 
     private ProductResponse fetchProduct(long productId) {
-        return productFeignApiClient.getProduct(productId);
+        try {
+            return productFeignApiClient.getProduct(productId);
+        } catch (Exception e) {
+            throw new ProductException(e.getMessage());
+        }
     }
 
     private void mapToOrderQuotationResponse() {

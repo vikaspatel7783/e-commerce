@@ -9,5 +9,5 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface ProductFeignApiClient {
 
     @GetMapping("/products/inventory/{id}")
-    ProductResponse getProduct(@PathVariable("id") long id);
+    ProductResponse getProduct(@PathVariable("id") long id) throws Exception;
 }
