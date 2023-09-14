@@ -1,0 +1,28 @@
+#logging.level.org.springframework.cloud.gateway.handler.RoutePredicateHandlerMapping
+
+server:
+  port: 8081
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    register-with-eureka: false
+    fetch-registry: true
+
+spring:
+  application:
+    name: GATEWAY-SERVICE
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: product-inventory-service
+          uri: lb://product-inventory-service
+          predicates:
+            - Method=GET
+            - Path=/gateway/products/{id} # outside path
+          filters:
+            - SetPath=/products/inventory/{id} # mapped to service path
