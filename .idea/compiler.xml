@@ -8,6 +8,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="config-server" />
+        <module name="order-service" />
         <module name="eureka-server" />
         <module name="product-inventory-service" />
         <module name="gateway-service" />
@@ -17,6 +18,7 @@
       <module name="config-server" target="17" />
       <module name="eureka-server" target="17" />
       <module name="gateway-service" target="17" />
+      <module name="order-service" target="17" />
       <module name="product-inventory-service" target="17" />
     </bytecodeTargetLevel>
   </component>
@@ -25,6 +27,7 @@
       <module name="config-server" options="-parameters" />
       <module name="eureka-server" options="-parameters" />
       <module name="gateway-service" options="-parameters" />
+      <module name="order-service" options="-parameters" />
       <module name="product-inventory-service" options="-parameters" />
     </option>
   </component>
