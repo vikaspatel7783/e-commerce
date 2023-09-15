@@ -19,9 +19,12 @@ public class ProductInventory {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false, name = "price")
+    @Column(name = "price")
     private float unitPrice;
 
-    @Column(nullable = false, name = "in_stock")
+    @Column(name = "discount_percentage", columnDefinition = "float default 0")
+    private float discountInPercentage = 0;
+
+    @Column(name = "in_stock", columnDefinition = "boolean default false")
     private boolean inStock;
 }

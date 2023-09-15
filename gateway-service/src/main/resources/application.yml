@@ -19,6 +19,7 @@ spring:
         locator:
           enabled: true
       routes:
+        # PRODUCT-INVENTORY-SERVICE route configuration
         - id: product-inventory-service
           uri: lb://product-inventory-service
           predicates:
@@ -26,3 +27,12 @@ spring:
             - Path=/gateway/products/{id} # outside path
           filters:
             - SetPath=/products/inventory/{id} # mapped to service path
+
+        # ORDER-SERVICE route configuration
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Method=POST
+            - Path=/gateway/orders/quotation # outside path
+          filters:
+            - SetPath=/orders/quotation # mapped to service path

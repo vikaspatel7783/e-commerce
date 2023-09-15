@@ -12,4 +12,5 @@ public class QuotationResponse {
     private int quantity;
     private float discount;
     private float totalPrice;
+    private float finalPrice;
 }
