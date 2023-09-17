@@ -1,6 +1,6 @@
-package com.ecommerce.order.service.entity;
+package com.vikas.ecommerce.ordertrack.message;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,11 +8,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "ORDERS")
 public class Order {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "order_id")
     private long id;
 
     @Column(name = "product_name", nullable = false)

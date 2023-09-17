@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class RabbitMQConfig {
+public class MQConfig {
 
     @Value("${rabbitmq.order-track.queue}")
     private String queue;
@@ -25,17 +25,17 @@ public class RabbitMQConfig {
     private String routingKey;
 
     @Bean
-    private Queue queue() {
+    public Queue queue() {
         return new Queue(queue);
     }
 
     @Bean
-    private TopicExchange exchange() {
+    public TopicExchange exchange() {
         return new TopicExchange(exchange);
     }
 
     @Bean
-    private Binding binding() {
+    public Binding binding() {
         return BindingBuilder
                 .bind(queue())
                 .to(exchange())

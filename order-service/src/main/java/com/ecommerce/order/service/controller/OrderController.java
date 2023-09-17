@@ -6,6 +6,8 @@ import com.ecommerce.order.service.dto.ProductResponse;
 import com.ecommerce.order.service.dto.QuotationResponse;
 import com.ecommerce.order.service.entity.Order;
 import com.ecommerce.order.service.exception.ProductException;
+import com.ecommerce.order.service.producer.MessageProducer;
+import com.ecommerce.order.service.producer.OrderEvent;
 import com.ecommerce.order.service.service.OrderService;
 import com.ecommerce.order.service.service.ProductFeignApiClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,6 +30,8 @@ public class OrderController {
     private OrderService orderService;
     @Autowired
     private ProductFeignApiClient productFeignApiClient;
+    @Autowired
+    private MessageProducer messageProducer;
 
     @PostMapping(value = "/quotation", consumes = "application/json", produces = "application/json")
     public ResponseEntity<OrderQuotationResponse> requestQuotation(@RequestBody OrderQuotationRequest orderQuotationRequest) {
@@ -42,7 +46,15 @@ public class OrderController {
         }
 
         Order quotation = orderService.saveOrder(prepareOrderQuotation(orderQuotationRequest, productResponse));
+        OrderQuotationResponse orderQuotationResponse = prepareOrderQuotationResponse(quotation);
+        OrderEvent orderEvent = new OrderEvent(quotation);
+        messageProducer.sendOrderMessage(orderEvent);
 
+        LOGGER.info("Returning response for OrderQuotation");
+        return ResponseEntity.ok(orderQuotationResponse);
+    }
+
+    private OrderQuotationResponse prepareOrderQuotationResponse(Order quotation) {
         OrderQuotationResponse orderQuotationResponse = new OrderQuotationResponse();
         orderQuotationResponse.setId(quotation.getId());
         orderQuotationResponse.setProductId(quotation.getProductId());
@@ -55,11 +67,7 @@ public class OrderController {
         quotationResponse.setTotalPrice(quotation.getTotalPrice());
         quotationResponse.setFinalPrice(quotation.getFinalPrice());
         orderQuotationResponse.setQuotationResponse(quotationResponse);
-
-//        QuotationResponse quotationResponse = new ObjectMapper().convertValue(quotation, QuotationResponse.class);
-
-        LOGGER.info("Returning response for OrderQuotation");
-        return ResponseEntity.ok(orderQuotationResponse);
+        return orderQuotationResponse;
     }
 
     private ProductResponse fetchProduct(long productId) {
