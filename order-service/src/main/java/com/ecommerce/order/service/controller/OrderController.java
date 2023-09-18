@@ -1,16 +1,13 @@
 package com.ecommerce.order.service.controller;
 
-import com.ecommerce.order.service.dto.OrderQuotationRequest;
-import com.ecommerce.order.service.dto.OrderQuotationResponse;
-import com.ecommerce.order.service.dto.ProductResponse;
-import com.ecommerce.order.service.dto.QuotationResponse;
+import com.ecommerce.order.service.dto.*;
 import com.ecommerce.order.service.entity.Order;
+import com.ecommerce.order.service.exception.OrderException;
 import com.ecommerce.order.service.exception.ProductException;
 import com.ecommerce.order.service.producer.MessageProducer;
 import com.ecommerce.order.service.producer.OrderEvent;
 import com.ecommerce.order.service.service.OrderService;
 import com.ecommerce.order.service.service.ProductFeignApiClient;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderController {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(OrderController.class);
+    public static final String QUOTATION_SENT = "QUOTATION_SENT";
+    public static final String CONFIRMED = "CONFIRMED";
 
     @Autowired
     private OrderService orderService;
@@ -52,6 +51,34 @@ public class OrderController {
 
         LOGGER.info("Returning response for OrderQuotation");
         return ResponseEntity.ok(orderQuotationResponse);
+    }
+
+    @PostMapping(value = "/confirm", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<ConfirmOrderResponse> confirmOrder(@RequestBody ConfirmOrderRequest confirmOrderRequest) {
+        LOGGER.info("Request received to confirm order: {}", confirmOrderRequest.getOrderId());
+
+        Order order = getSavedOrder(confirmOrderRequest);
+        order.setState(CONFIRMED);
+        orderService.saveOrder(order);
+
+        OrderEvent orderEvent = new OrderEvent(order);
+        messageProducer.sendOrderMessage(orderEvent);
+
+        ConfirmOrderResponse confirmOrderResponse = new ConfirmOrderResponse();
+        confirmOrderResponse.setOrderId(order.getId());
+        confirmOrderResponse.setOrderState(CONFIRMED);
+
+        LOGGER.info("Returning response for ConfirmOrder");
+        return ResponseEntity.ok(confirmOrderResponse);
+    }
+
+    private Order getSavedOrder(ConfirmOrderRequest confirmOrderRequest) {
+        long orderId = confirmOrderRequest.getOrderId();
+        Order order = orderService.getOrder(orderId).orElseThrow(() -> new OrderException("Order not found: "+orderId));
+        if (!order.getState().equals(QUOTATION_SENT)) {
+            throw new OrderException("Order quotation not found for: "+orderId);
+        }
+        return order;
     }
 
     private OrderQuotationResponse prepareOrderQuotationResponse(Order quotation) {
@@ -92,7 +119,7 @@ public class OrderController {
         order.setDiscount(discountForUnit * orderQuotationRequest.getQuantity());
         order.setTotalPrice(productResponse.getUnitPrice() * orderQuotationRequest.getQuantity());
         order.setFinalPrice(finalPrice);
-        order.setState("QUOTATION_SENT");
+        order.setState(QUOTATION_SENT);
         return order;
     }
 

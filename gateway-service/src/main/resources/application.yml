@@ -36,3 +36,11 @@ spring:
             - Path=/gateway/orders/quotation # outside path
           filters:
             - SetPath=/orders/quotation # mapped to service path
+
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Method=POST
+            - Path=/gateway/orders/confirm
+          filters:
+            - SetPath=/orders/confirm

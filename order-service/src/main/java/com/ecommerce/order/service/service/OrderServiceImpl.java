@@ -4,6 +4,8 @@ import com.ecommerce.order.service.entity.Order;
 import com.ecommerce.order.service.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class OrderServiceImpl implements OrderService {
 
@@ -16,5 +18,10 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order saveOrder(Order order) {
         return orderRepository.save(order);
+    }
+
+    @Override
+    public Optional<Order> getOrder(long orderId) {
+        return orderRepository.findById(orderId);
     }
 }
