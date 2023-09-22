@@ -28,6 +28,14 @@ spring:
           filters:
             - SetPath=/products/inventory/{id} # mapped to service path
 
+        - id: product-inventory-service
+          uri: lb://product-inventory-service
+          predicates:
+            - Method=GET
+            - Path=/gateway/products/inventory/all # outside path
+          filters:
+            - SetPath=/products/inventory/all # mapped to service path
+
         # ORDER-SERVICE route configuration
         - id: order-service
           uri: lb://order-service

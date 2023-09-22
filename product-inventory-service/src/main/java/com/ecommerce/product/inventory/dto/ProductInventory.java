@@ -10,9 +10,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ProductInventory {
     private long id;
+
     @NotEmpty(message = "product name must not be empty")
     private String name;
+
     private float unitPrice;
-    private float discountInPercentage;
+
     private boolean inStock;
 }

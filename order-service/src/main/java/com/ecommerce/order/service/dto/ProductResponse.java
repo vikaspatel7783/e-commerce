@@ -11,6 +11,6 @@ public class ProductResponse {
     private long id;
     private String name;
     private float unitPrice;
-    private float discountInPercentage;
+    private float discountPercent;
     private boolean inStock;
 }

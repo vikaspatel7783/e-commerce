@@ -1,13 +1,17 @@
 package com.ecommerce.product.inventory.contoller;
 
+import com.ecommerce.product.inventory.dto.Product;
 import com.ecommerce.product.inventory.dto.ProductInventory;
 import com.ecommerce.product.inventory.exception.ProductNotFoundException;
+import com.ecommerce.product.inventory.service.DiscountProviderService;
 import com.ecommerce.product.inventory.service.ProductInventoryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,8 +27,16 @@ public class ProductInventoryController {
     @Autowired
     private ProductInventoryService productInventoryService;
 
-    @GetMapping(produces = "application/json")
-    public ResponseEntity<List<ProductInventory>> getAllProducts() {
+    @Autowired
+    private DiscountProviderService discountProviderService;
+
+    @GetMapping("/discount-percentage/get")
+    public String getDiscountPercentage() {
+        return String.valueOf(discountProviderService.getDiscountPercent());
+    }
+
+    @GetMapping(path = "/all", produces = "application/json")
+    public ResponseEntity<List<Product>> getAllProducts() {
         LOGGER.info("Request received to getAllProducts.");
         List<com.ecommerce.product.inventory.entity.ProductInventory> allProductInventories = productInventoryService.getAllProducts();
         LOGGER.info("Returning response of getAllProducts");
@@ -50,12 +62,14 @@ public class ProductInventoryController {
         return ResponseEntity.ok(mapEntityToDto(product));
     }
 
-    private List<ProductInventory> mapEntityToDto(List<com.ecommerce.product.inventory.entity.ProductInventory> productsEntity) {
+    private List<Product> mapEntityToDto(List<com.ecommerce.product.inventory.entity.ProductInventory> productsEntity) {
         return productsEntity.stream().map(this::mapEntityToDto).collect(Collectors.toList());
     }
 
-    private ProductInventory mapEntityToDto(com.ecommerce.product.inventory.entity.ProductInventory productInventory) {
-        return new ObjectMapper().convertValue(productInventory, ProductInventory.class);
+    private Product mapEntityToDto(com.ecommerce.product.inventory.entity.ProductInventory productInventory) {
+        Product product = new ObjectMapper().convertValue(productInventory, Product.class);
+        product.setDiscountPercent(discountProviderService.getDiscountPercent());
+        return product;
     }
 
     private com.ecommerce.product.inventory.entity.ProductInventory mapDtoToEntity(ProductInventory productInventory) {

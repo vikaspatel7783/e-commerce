@@ -112,7 +112,7 @@ public class OrderController {
         order.setUnitPrice(productResponse.getUnitPrice());
         order.setQuantity(orderQuotationRequest.getQuantity());
 
-        float discountForUnit = productResponse.getUnitPrice() * (productResponse.getDiscountInPercentage() / 100);
+        float discountForUnit = productResponse.getUnitPrice() * (productResponse.getDiscountPercent() / 100);
         float unitPriceAfterDiscount = productResponse.getUnitPrice() - discountForUnit;
         float finalPrice = unitPriceAfterDiscount * orderQuotationRequest.getQuantity();
 
