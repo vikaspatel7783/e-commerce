@@ -4,6 +4,7 @@ import com.ecommerce.user.dto.User;
 import com.ecommerce.user.exception.UserAlreadyExistException;
 import com.ecommerce.user.service.UserService;
 import jakarta.validation.Valid;
+import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +27,7 @@ public class UserController {
         }
         com.ecommerce.user.entity.User userEntity = new com.ecommerce.user.entity.User();
         userEntity.setEmail(user.getEmail());
-        userEntity.setAuthToken(String.valueOf(new Random().nextLong()));
+        userEntity.setAuthToken(RandomStringUtils.random(30, true, true));
 
         return ResponseEntity.ok(userService.saveUser(userEntity));
     }
