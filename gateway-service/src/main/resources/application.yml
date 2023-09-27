@@ -52,3 +52,12 @@ spring:
             - Path=/gateway/orders/confirm
           filters:
             - SetPath=/orders/confirm
+
+        # USER-SERVICE route configuration
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Method=POST
+            - Path=/gateway/users/signup
+          filters:
+            - SetPath=/users/signup
