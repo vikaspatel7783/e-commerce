@@ -1,6 +1,7 @@
 package com.ecommerce.user.controller;
 
 import com.ecommerce.user.dto.User;
+import com.ecommerce.user.exception.InvalidSearchCriteriaException;
 import com.ecommerce.user.exception.UserAlreadyExistException;
 import com.ecommerce.user.service.UserService;
 import jakarta.validation.Valid;
@@ -8,7 +9,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Random;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -22,7 +23,7 @@ public class UserController {
 
     @PostMapping("/signup")
     public ResponseEntity<com.ecommerce.user.entity.User> signUp(@Valid @RequestBody User user) {
-        if (userService.findUser(user.getEmail()).isPresent()) {
+        if (userService.findUserByEmail(user.getEmail()).isPresent()) {
             throw new UserAlreadyExistException("User with this email already exist");
         }
         com.ecommerce.user.entity.User userEntity = new com.ecommerce.user.entity.User();
@@ -32,9 +33,25 @@ public class UserController {
         return ResponseEntity.ok(userService.saveUser(userEntity));
     }
 
-    @GetMapping("/{email}")
-    public ResponseEntity<com.ecommerce.user.entity.User> getUser(@PathVariable("email") String email) {
-        com.ecommerce.user.entity.User user = userService.findUser(email).orElse(null);
-        return ResponseEntity.ok(user);
+    // http://localhost:8085/users?email=?
+    // http://localhost:8085/users?authToken=?
+    @GetMapping("/retrieve")
+    public ResponseEntity<com.ecommerce.user.entity.User> getUserBySearchCriteria(@RequestParam Map<String, String> criteriaParams) {
+        if (criteriaParams.isEmpty()) {
+            throw new InvalidSearchCriteriaException("Request does not have any search criteria");
+        }
+
+        String email = criteriaParams.get("email");
+        if (email != null && !email.isEmpty()) {
+            return ResponseEntity.ok(userService.findUserByEmail(email).orElse(null));
+        }
+
+        String authToken = criteriaParams.get("authToken");
+        if (authToken != null && !authToken.isEmpty()) {
+            return ResponseEntity.ok(userService.findUserByAuthToken(authToken).orElse(null));
+        }
+
+        throw new InvalidSearchCriteriaException("Request does not have valid search criteria");
     }
+
 }

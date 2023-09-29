@@ -7,6 +7,8 @@ import java.util.Optional;
 public interface UserService {
     User saveUser(User user);
 
-    Optional<User> findUser(String email);
+    Optional<User> findUserByEmail(String email);
+
+    Optional<User> findUserByAuthToken(String authToken);
 
 }

@@ -9,7 +9,7 @@ import java.util.Optional;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -19,7 +19,12 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
-    public Optional<User> findUser(String email) {
+    public Optional<User> findUserByEmail(String email) {
         return userRepository.findByEmail(email);
+    }
+
+    @Override
+    public Optional<User> findUserByAuthToken(String authToken) {
+        return userRepository.findByAuthToken(authToken);
     }
 }

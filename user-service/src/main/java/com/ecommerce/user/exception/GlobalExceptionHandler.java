@@ -26,9 +26,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 LocalDateTime.now(),
                 userAlreadyExistException.getMessage(),
                 webRequest.getDescription(false),
-                "USER_ALREADY_EXIST_EXCEPTION"
+                "USER_ALREADY_EXIST"
         );
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(InvalidSearchCriteriaException.class)
+    public ResponseEntity<ErrorDetails> handleInvalidSearchCriteriaException(InvalidSearchCriteriaException invalidSearchCriteriaException, WebRequest webRequest) {
+        ErrorDetails errorDetails = new ErrorDetails(
+                LocalDateTime.now(),
+                invalidSearchCriteriaException.getMessage(),
+                webRequest.getDescription(false),
+                "INVALID_SEARCH_CRITERIA"
+        );
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
 
     public ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
