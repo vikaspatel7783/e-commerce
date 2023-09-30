@@ -38,4 +38,7 @@ public class Order {
 
     @Column(nullable = false, name = "order_state")
     private String state;
+
+    @Column(name = "checkout_id")
+    private String checkoutId;
 }

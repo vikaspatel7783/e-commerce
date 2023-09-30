@@ -10,6 +10,7 @@ import java.util.Date;
 public class OrderEvent {
     private String date;
     private Order order;
+    private String checkoutId;
 
     public OrderEvent(Order order) {
         this.order = order;

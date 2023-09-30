@@ -2,10 +2,12 @@ package com.ecommerce.order.service.controller;
 
 import com.ecommerce.order.service.dto.*;
 import com.ecommerce.order.service.entity.Order;
+import com.ecommerce.order.service.exception.CheckoutException;
 import com.ecommerce.order.service.exception.OrderException;
 import com.ecommerce.order.service.exception.ProductException;
 import com.ecommerce.order.service.producer.MessageProducer;
 import com.ecommerce.order.service.producer.OrderEvent;
+import com.ecommerce.order.service.service.CheckoutFeignApiClient;
 import com.ecommerce.order.service.service.OrderService;
 import com.ecommerce.order.service.service.ProductFeignApiClient;
 import org.slf4j.Logger;
@@ -30,6 +32,8 @@ public class OrderController {
     @Autowired
     private ProductFeignApiClient productFeignApiClient;
     @Autowired
+    private CheckoutFeignApiClient checkoutFeignApiClient;
+    @Autowired
     private MessageProducer messageProducer;
 
     @PostMapping(value = "/quotation", consumes = "application/json", produces = "application/json")
@@ -39,7 +43,7 @@ public class OrderController {
         long productId = orderQuotationRequest.getProductId();
 
         // fetch product from product-inventory-service
-        ProductResponse productResponse = fetchProduct(productId);
+        ProductResponse productResponse = invokeFetchProductService(productId);
         if (!productResponse.isInStock()) {
             throw new ProductException(String.format("Product %s in currently out of stock", productResponse.getName()));
         }
@@ -58,18 +62,42 @@ public class OrderController {
         LOGGER.info("Request received to confirm order: {}", confirmOrderRequest.getOrderId());
 
         Order order = getSavedOrder(confirmOrderRequest);
+
+        publishOrderInitiatedEvent(order);
+
+        CheckoutResponse checkout = invokeCheckoutService(order);
+
+        publishOrderConfirmedEvent(order, checkout);
+
         order.setState(CONFIRMED);
+        order.setCheckoutId(checkout.getCheckoutId());
         orderService.saveOrder(order);
 
-        OrderEvent orderEvent = new OrderEvent(order);
-        messageProducer.sendOrderMessage(orderEvent);
-
-        ConfirmOrderResponse confirmOrderResponse = new ConfirmOrderResponse();
-        confirmOrderResponse.setOrderId(order.getId());
-        confirmOrderResponse.setOrderState(CONFIRMED);
+        ConfirmOrderResponse confirmOrderResponse = prepareConfirmOrderResponse(order, checkout);
 
         LOGGER.info("Returning response for ConfirmOrder");
         return ResponseEntity.ok(confirmOrderResponse);
+    }
+
+    private static ConfirmOrderResponse prepareConfirmOrderResponse(Order order, CheckoutResponse checkout) {
+        ConfirmOrderResponse confirmOrderResponse = new ConfirmOrderResponse();
+        confirmOrderResponse.setOrderId(order.getId());
+        confirmOrderResponse.setOrderState(CONFIRMED);
+        confirmOrderResponse.setCheckoutId(checkout.getCheckoutId());
+        return confirmOrderResponse;
+    }
+
+    private void publishOrderConfirmedEvent(Order order, CheckoutResponse checkout) {
+        OrderEvent orderEvent = new OrderEvent(order);
+        orderEvent.getOrder().setState("CONFIRMED");
+        orderEvent.setCheckoutId(checkout.getCheckoutId());
+        messageProducer.sendOrderMessage(orderEvent);
+    }
+
+    private void publishOrderInitiatedEvent(Order order) {
+        OrderEvent orderEvent = new OrderEvent(order);
+        orderEvent.getOrder().setState("INITIATED");
+        messageProducer.sendOrderMessage(orderEvent);
     }
 
     private Order getSavedOrder(ConfirmOrderRequest confirmOrderRequest) {
@@ -97,11 +125,21 @@ public class OrderController {
         return orderQuotationResponse;
     }
 
-    private ProductResponse fetchProduct(long productId) {
+    private ProductResponse invokeFetchProductService(long productId) {
         try {
             return productFeignApiClient.getProduct(productId);
         } catch (Exception e) {
             throw new ProductException(e.getMessage());
+        }
+    }
+
+    private CheckoutResponse invokeCheckoutService(Order order) {
+        CheckoutRequest checkoutRequest = new CheckoutRequest();
+        checkoutRequest.setOrderId(String.valueOf(order.getId()));
+        try {
+            return checkoutFeignApiClient.checkout(checkoutRequest);
+        } catch (Exception e) {
+            throw new CheckoutException(e.getMessage());
         }
     }
 
