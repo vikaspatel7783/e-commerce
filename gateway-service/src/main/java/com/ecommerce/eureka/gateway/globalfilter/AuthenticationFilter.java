@@ -1,15 +1,12 @@
 package com.ecommerce.eureka.gateway.globalfilter;
 
-import com.ecommerce.eureka.gateway.exception.UnauthorisedException;
-import com.google.common.base.Optional;
+import com.ecommerce.eureka.gateway.exception.UnauthorizedException;
+import com.ecommerce.eureka.gateway.userservice.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
@@ -24,6 +21,18 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     private final Logger LOGGER = LoggerFactory.getLogger(AuthenticationFilter.class);
     private static final int SECOND_HIGHEST_ORDER = 0;
 
+//    private UserServiceCommunicator userServiceCommunicator;
+//
+//    public AuthenticationFilter(@Lazy UserServiceCommunicator userServiceCommunicator) {
+//        this.userServiceCommunicator = userServiceCommunicator;
+//    }
+
+    private UserService userService;
+
+    public AuthenticationFilter(UserService userService) {
+        this.userService = userService;
+    }
+
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         logRequest(exchange);
@@ -37,18 +46,59 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     private void logRequest(ServerWebExchange exchange) {
         ServerHttpRequest request = exchange.getRequest();
         LOGGER.info("-------- Request at AuthenticationFilter -------");
-        List<String> authorization = request.getHeaders().get("Authorization");
+
+        if (checkSkipFilter(request)) {
+            return;
+        }
+
+        List<String> authorization = request.getHeaders().get("authToken");
         if (authorization == null || authorization.isEmpty()) {
-            throw new UnauthorisedException(HttpStatus.UNAUTHORIZED, "Authorization token not found");
+            LOGGER.info("Authorization token not found in request header");
+            throwUnauthorizedException("Authorization token not found in request header");
         }
         String authToken = authorization.get(0);
-        LOGGER.info("Authorization header: "+ authToken);
+        LOGGER.info("Authorization header: " + authToken);
+
+        authenticateToken(authToken);
+    }
+
+    private void throwUnauthorizedException(String message) {
+        throw new UnauthorizedException(message);
     }
 
     private void logResponse(ServerWebExchange exchange) {
         ServerHttpResponse response = exchange.getResponse();
         LOGGER.info("--------- Response at AuthenticationFilter --------");
         LOGGER.info("Response Status code: " + response.getStatusCode());
+    }
+
+    private void authenticateToken(String token) {
+//        User user = userServiceCommunicator.getUser(token);
+//        if (!user.getAuthToken().equals(token)) {
+//            throwUnauthorizedException();
+//        }
+//        userServiceCommunicator.getUser(token).subscribe(user -> {
+//            if (!user.getAuthToken().equals(token)) {
+//                throwUnauthorizedException();
+//            }
+//        });
+
+        userService.findUserByAuthToken(token)
+                .orElseThrow(() -> {
+                            LOGGER.info("Invalid authToken supplied");
+                            throwUnauthorizedException("Invalid authToken supplied");
+                            return null;
+                        }
+                );
+        LOGGER.info("AuthToken successfully matched.");
+    }
+
+    private boolean checkSkipFilter(ServerHttpRequest request) {
+        if (request.getPath().toString().equals("/gateway/users/signup")) {
+            LOGGER.info("Skipping filter for /gateway/users/signup path");
+            return true;
+        }
+        return false;
     }
 
     @Override

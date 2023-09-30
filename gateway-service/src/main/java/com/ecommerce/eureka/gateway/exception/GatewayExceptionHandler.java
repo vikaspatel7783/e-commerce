@@ -13,10 +13,10 @@ import reactor.core.publisher.Mono;
 @ControllerAdvice
 public class GatewayExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(UnauthorisedException.class)
-    public Mono<ServerResponse> handleIllegalState(ServerWebExchange exchange, UnauthorisedException exc) {
-        exchange.getAttributes().putIfAbsent(ErrorAttributes.ERROR_ATTRIBUTE, exc);
-        return ServerResponse.from(ErrorResponse.builder(exc, HttpStatus.FORBIDDEN, exc.getMessage()).build());
-    }
+//    @ExceptionHandler(UnauthorizedException.class)
+//    public Mono<ServerResponse> handleIllegalState(ServerWebExchange exchange, UnauthorizedException exc) {
+//        exchange.getAttributes().putIfAbsent(ErrorAttributes.ERROR_ATTRIBUTE, exc);
+//        return ServerResponse.from(ErrorResponse.builder(exc, HttpStatus.FORBIDDEN, exc.getMessage()).build());
+//    }
 
 }
